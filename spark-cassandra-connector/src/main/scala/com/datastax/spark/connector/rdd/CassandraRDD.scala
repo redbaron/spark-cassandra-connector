@@ -1,24 +1,21 @@
 package com.datastax.spark.connector.rdd
 
 import java.io.IOException
-import scala.reflect.ClassTag
-import scala.collection.JavaConversions._
-import scala.language.existentials
-
-import com.datastax.spark.connector.metrics.InputMetricsUpdater
-import org.apache.spark.rdd.RDD
-import org.apache.spark.{Dependency, Partition, SparkContext, TaskContext}
 
 import com.datastax.driver.core._
-import com.datastax.spark.connector.{SomeColumns, AllColumns, ColumnSelector}
+import com.datastax.spark.connector._
 import com.datastax.spark.connector.cql._
-import com.datastax.spark.connector.rdd.partitioner.{CassandraRDDPartitioner, CassandraPartition, CqlTokenRange}
+import com.datastax.spark.connector.metrics.InputMetricsUpdater
 import com.datastax.spark.connector.rdd.partitioner.dht.TokenFactory
+import com.datastax.spark.connector.rdd.partitioner.{CassandraPartition, CassandraRDDPartitioner, CqlTokenRange}
 import com.datastax.spark.connector.rdd.reader._
 import com.datastax.spark.connector.types.{ColumnType, TypeConverter}
-import com.datastax.spark.connector.util.{Logging, CountingIterator}
-import com.datastax.spark.connector._
+import com.datastax.spark.connector.util.CountingIterator
+import org.apache.spark.{Dependency, Partition, SparkContext, TaskContext}
 
+import scala.collection.JavaConversions._
+import scala.language.existentials
+import scala.reflect.ClassTag
 
 
 /** RDD representing a Cassandra table.
@@ -63,12 +60,12 @@ class CassandraRDD[R] private[connector](
 
 
   override protected def copy(columnNames: ColumnSelector = columnNames,
-                   where: CqlWhereClause = where,
-                   readConf: ReadConf = readConf, connector: CassandraConnector = connector) = {
+                              where: CqlWhereClause = where,
+                              readConf: ReadConf = readConf, connector: CassandraConnector = connector) = {
     require(sc != null,
       "RDD transformation requires a non-null SparkContext. Unfortunately SparkContext in this CassandraRDD is null. " +
-      "This can happen after CassandraRDD has been deserialized. SparkContext is not Serializable, therefore it deserializes to null." +
-      "RDD transformations are not allowed inside lambdas used in other RDD transformations.")
+        "This can happen after CassandraRDD has been deserialized. SparkContext is not Serializable, therefore it deserializes to null." +
+        "RDD transformations are not allowed inside lambdas used in other RDD transformations.")
     new CassandraRDD[R](sc, connector, keyspaceName, tableName, columnNames, where, readConf).asInstanceOf[this.type]
   }
 
